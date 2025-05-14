@@ -9,7 +9,7 @@ use App\Http\Requests\Post\StoreRequest;
 use App\Http\Requests\Post\PutRequest;
 
 use App\Models\Category;
-use Illuminate\Support\Facades\Validator;
+
 
 class PostController extends Controller
 {
