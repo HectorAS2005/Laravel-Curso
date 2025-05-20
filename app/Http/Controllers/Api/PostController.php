@@ -7,15 +7,32 @@ use App\Http\Requests\Post\StoreRequest;
 use App\Models\Post;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PostController extends Controller
 {
+    public function all() {
+
+        // if(Cache::has('post_all')) {
+        //     return response()->json(Cache::get('post_all'));
+        // } else {
+        //     $posts = Post::all();
+        //     Cache::put('post_all', $posts, 60 * 60 * 24); // 1 día
+        //     return response()->json($posts);
+        // }
+
+        return response()->json(Cache::remember('post_page_1', now()->addMinute(), function () {
+            return Post::paginate(50);  // Cambia 50 por el número que quieras
+        }));
+    }
+
+
     public function index()
     {
         return response()->json(Post::paginate(10));
     }
 
-    public function all()
+    public function alll()
     {
         return response()->json(Post::get());
     }
@@ -42,9 +59,9 @@ class PostController extends Controller
         return response()->json("ok");
     }
     
-    public function slug(Post $post)
-    {
+    // public function slug(Post $post)
+    // {
         
-        return response()->json($post);
-    }
+    //     return response()->json($post);
+    // }
 }
