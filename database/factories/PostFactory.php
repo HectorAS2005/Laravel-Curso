@@ -12,16 +12,18 @@ class PostFactory extends Factory
 
     public function definition(): array
     {
+        Post::truncate();
         $title = $this->faker->sentence;
 
-        return [
+        return [ 
             'title' => $title,
             'slug' => Str::slug($title),
             'description' => $this->faker->text(200),
             'content' => $this->faker->text(250), 
-            'image' => $this->faker->imageUrl(640, 480, 'posts', true), // genera URL de imagen falsa
+            'image' => $this->faker->imageUrl(), 
             'posted' => $this->faker->randomElement(['yes', 'no']),
-            'category_id' => 1, // Puedes cambiar esto si tienes categorías dinámicas
+            'category_id' => $this->faker->randomElement([1, 2]),
+            'user_id' => $this->faker->randomElement([1, 2]), 
             'created_at' => now(),
             'updated_at' => now(),
         ];

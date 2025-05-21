@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Post;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use App\Http\Requests\Post\StoreRequest;
 use App\Http\Requests\Post\PutRequest;
@@ -16,36 +18,16 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(){
+    public function index()
+    {
+        if (Gate::denies('index', Post::class)) {
+            return abort(403, 'No tienes permiso para ver los posts.');
+        }
+
         $posts = Post::paginate(2);
         return view('dashboard.post.index', compact('posts'));
-        // Create a new post
-        /* Post::create(
-            [
-                'title' => 'new test title',
-                'slug' => 'test slug',
-                'content' => 'test content',
-                'category_id' => 1,
-                'description' => 'test description',
-                'posted' => 'no',
-                'image' => 'test image',
-            ]
-        ); */
-
-        // Update a post
-        /* $post->update(
-            [
-                'title' => 'new test title',
-            ]
-        ); */
-
-        // Delete a post
-        /* $post = Post::find(1)->delete(); */
-
-        // $post = Post::find(1);
-        // $category = $post->category;
-        // return 'Index';
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -54,44 +36,27 @@ class PostController extends Controller
     {
         $categories = Category::pluck('id', 'title');
         $post = new Post();
+        
+        if (Gate::denies('create', $post)) {
+            return abort(403, 'No tienes permiso para ver los posts.');
+        }
+
         return view('dashboard.post.create', compact('categories', 'post'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreRequest $request){
-        // Validate the request data
-        // $validated = Validator::make($request->all(), [
-        //     'title' => 'required|min:5|max:255',
-        //     'slug' => 'required|min:5|max:255',
-        //     'content' => 'required|min:7',
-        //     'category_id' => 'required|integer',
-        //     'description' => 'nullable|min:7',
-        //     'posted' => 'required',
-        // ]);
-        // dd($validated->fails()); // True if validation fails, false if it passes
+    public function store(StoreRequest $request) {
+        $post = new Post($request->validated());
 
-        /* $request->validate([
-            'title' => 'required|min:5|max:255',
-            'slug' => 'required|min:5|max:255',
-            'content' => 'required|min:7',
-            'category_id' => 'required|integer',
-            'description' => 'nullable|min:7',
-            'posted' => 'required',
-        ]);  */
+        if (Gate::denies('create', $post)) {
+            return abort(403, 'No tienes permiso para ver los posts.');
+        }
 
-        Post::create($request->validated());
+        Auth::user()->posts()->save($post);
+
         return to_route('post.index');
-
-        /* Post::create([
-            'title' => $request->title,
-            'slug' => $request->slug,
-            'content' => $request->content,
-            'category_id' => $request->category_id,
-            'description' => $request->description,
-            'posted' => $request->posted,
-        ]); */
     }
 
     /**
@@ -99,6 +64,10 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
+        if (Gate::denies('view', $post)) {
+            return abort(403, 'No tienes permiso para ver los posts.');
+        }
+
         return view('dashboard.post.show', ['post' => $post]);
     }
 
@@ -107,9 +76,16 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
+        // Si el Gate deniega acceso, abortar con 403
+        if (Gate::denies('update', $post)) {
+            return abort(403, 'No tienes permiso para editar este post.');
+        }
+
         $categories = Category::pluck('id', 'title');
         return view('dashboard.post.edit', compact('categories', 'post'));
     }
+
+
 
     /**
      * Update the specified resource in storage.
@@ -131,6 +107,10 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        if (Gate::denies('delete', $post)) {
+            return abort(403, 'No tienes permiso para editar este post.');
+        }
+        
         $post->delete();
         return to_route('post.index');
     }

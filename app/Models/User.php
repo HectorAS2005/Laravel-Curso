@@ -56,4 +56,9 @@ class User extends Authenticatable
     public function isRegular() {
         return $this->rol == 'regular';
     }
+
+    public function posts() 
+    {
+        return $this->hasMany(Post::class);
+    }
 }
