@@ -20,6 +20,7 @@ class PostController extends Controller
      */
     public function index()
     {
+        dd(Auth::user()->can('editor.post.index'));
         if (Gate::denies('index', Post::class)) {
             return abort(403, 'No tienes permiso para ver los posts.');
         }
